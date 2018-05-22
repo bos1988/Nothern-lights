@@ -1,0 +1,253 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<title>Northern lights</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<style>
+			#content
+			{
+				color: #fff;
+				/*min-height: 800px;*/
+			}
+
+			#canvas
+			{
+				width: 80%;
+				height: 350px;
+				position: absolute;
+				bottom: 0%;
+				right: 0%;
+				z-index: -10;
+			}
+
+			#stars
+			{
+				width: 100%;
+				position: absolute;
+				bottom: 0%;
+				left: 0%;
+				z-index: -5;
+			}
+
+			body
+			{
+				/*background: rgb(0,0,50);*/
+				background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(0,0,30,0.7) 100px, rgba(0,0,30,1) 300px, rgba(0,0,30,1) 100%);
+			}
+		</style>
+	</head>
+	<body>
+		<div id = "maincontent" class = "widers">
+			<div id = "content">
+				
+				<canvas id = "canvas" width = "800" height = "300"></canvas><br/>
+				<canvas id = "stars" width = "800" height = "400"></canvas><br/>
+				
+				
+			</div>
+		</div>
+		<script type="text/javascript" charset="utf-8">
+			function var_dump(obj)
+			{
+				var s = '<h1>' + obj + '</h1>';
+				s += '<ol>';
+
+				for (p in obj)
+					s += '<li><b>' + p + '</b> : ' + obj[p] + '</li>';
+				
+				s += '</ol>';
+				window.document.body.innerHTML = s;
+			}
+
+			function rounder(a, n)
+			{
+				var i = 1;
+				var m = 1;
+				do{
+					m*=10;
+					i++;
+				}while(i <= n)
+				var b = Math.round(parseFloat(a) * m)/m;
+				return b;
+			}
+			
+			document.getElementById('content').style.height = window.innerHeight + "px";
+			
+			var canvas = document.getElementById('canvas');
+			var ctx = canvas.getContext('2d');
+			var sA = canvas.width;
+			var sB = canvas.height;
+			//var background = '255,255,255';
+			var background = '0,0,30';
+			var stripes = 40;
+			var arr=[];
+			var arrNew=[];
+			var varies = {line1:[[0,0,0,0,0],[0,0,0,0,0]],line2:[[0,0,0,0,0],[0,0,0,0,0]]};
+			for(var k = 0; k < 5; k++)
+			{
+				varies.line1[0][k] = 1.01 - rounder(2*Math.random(), 1);
+				varies.line2[0][k] = 1.01 - rounder(2*Math.random(), 1);
+			}
+			var colorsArr = [[255,255,255,0,0,0]];
+			var striPoz = [[0,0]];
+			for(var t=1;t<stripes;t++)
+			{
+				colorsArr.push([]);
+				colorsArr[t][0] = Math.floor(100*Math.random());
+				colorsArr[t][1] = Math.floor(50*Math.random());
+				colorsArr[t][2] = Math.floor(150*Math.random());
+				colorsArr[t][3] = 5 - (10*Math.random());
+				colorsArr[t][4] = 5 - (10*Math.random());
+				colorsArr[t][5] = 5 - (10*Math.random());
+				striPoz.push([0,1 - rounder(2*Math.random(), 1)]);
+			}
+			
+			waves = function(val, rate, amplitude)
+			{
+				if(rate > 0 && val > amplitude)
+					rate = 0 - 0.05 - rounder(Math.random(), 2);
+				if(rate < 0 && val < (0-amplitude))
+					rate = 0.05 + rounder(Math.random(), 2);
+				return rate;
+			}
+			
+			redraw = function()
+			{
+				ctx.clearRect(0,0,sA,sB);
+				ctx.fillStyle = 'rgb('+background+')';
+				ctx.fillRect(0,0,sA,sB);
+				
+				var gradient = ctx.createLinearGradient(0,sB/2,sA,0);
+				gradient.addColorStop(0, 'rgb('+background+')');
+				for(var t=1;t<stripes;t++)
+				{
+					colorsArr[t][3] = waves(colorsArr[t][0],colorsArr[t][3],50);
+					colorsArr[t][4] = waves(colorsArr[t][1],colorsArr[t][4],30);
+					colorsArr[t][5] = waves(colorsArr[t][2],colorsArr[t][5],125);
+					colorsArr[t][0]+= (colorsArr[t][3]*5);
+					colorsArr[t][1]+= (colorsArr[t][4]*5);
+					colorsArr[t][2]+= (colorsArr[t][5]*5);
+					striPoz[t][1] = waves(striPoz[t][0]*10,striPoz[t][1],0.1);
+					striPoz[t][0]+=striPoz[t][1]/500;
+					gradient.addColorStop(t/stripes + striPoz[t][0],'rgb('+parseInt(50+colorsArr[t][0])+','+parseInt(225+colorsArr[t][1])+','+parseInt(130+colorsArr[t][2])+')');
+				}
+				gradient.addColorStop(1, 'rgb('+background+')');
+				
+				for(var k = 0; k < 5; k++)
+				{
+					varies.line1[0][k] = waves(varies.line1[1][k],varies.line1[0][k],0.3);
+					varies.line2[0][k] = waves(varies.line2[1][k],varies.line2[0][k],0.3);
+					
+					varies.line1[1][k]+= varies.line1[0][k]/100;
+					varies.line2[1][k]+= varies.line2[0][k]/100;
+				}
+				
+				arr[0]=[sA*0.1,(sB*(0.25+varies.line1[1][0])),sA*0.25,(sB*(0.25+varies.line1[1][1])),sA*0.45,(sB*(0.25+varies.line1[1][2]/2))];
+				arr[1]=[arr[0][4]*2-arr[0][2],arr[0][5]*2-arr[0][3],sA*0.85,(sB*(0.25+varies.line1[1][3])),sA*1,(sB*(0.25+varies.line1[1][4]*0.8))];
+				arr[2]=[arr[1][4],arr[1][5]+(sB*0.5)];
+				arr[3]=[arr[1][2],arr[1][3]+(sB*0.5),arr[1][0],arr[1][1]+(sB*0.5),arr[0][4],arr[0][5]+(sB*0.5)];
+				arr[4]=[arr[3][4]*2-arr[3][2],arr[3][5]*2-arr[3][3],arr[0][0],arr[0][1]+(sB*0.5),sA*0,sB*1];
+				
+				ctx.beginPath();
+				ctx.fillStyle = gradient;
+				ctx.moveTo(0,sB*0.5);
+				ctx.bezierCurveTo(arr[0][0],arr[0][1],arr[0][2],arr[0][3],arr[0][4],arr[0][5]);
+				ctx.bezierCurveTo(arr[1][0],arr[1][1],arr[1][2],arr[1][3],arr[1][4],arr[1][5]);
+				ctx.lineTo(arr[2][0],arr[2][1]);
+				ctx.bezierCurveTo(arr[3][0],arr[3][1],arr[3][2],arr[3][3],arr[3][4],arr[3][5]);
+				ctx.bezierCurveTo(arr[4][0],arr[4][1],arr[4][2],arr[4][3],arr[4][4],arr[4][5]);
+				ctx.fill();
+				ctx.closePath();
+				
+				for(var i=0;i<40;i++)
+				{
+					ctx.strokeStyle = 'rgba('+background+','+(1-i/40)+')';
+					ctx.lineWidth = 6;
+					
+					ctx.beginPath();
+					ctx.moveTo(0,sB*0.5+i*3);
+					ctx.bezierCurveTo(arr[0][0],arr[0][1]+i*3,arr[0][2],arr[0][3]+i*3,arr[0][4],arr[0][5]+i*3);
+					ctx.bezierCurveTo(arr[1][0],arr[1][1]+i*3,arr[1][2],arr[1][3]+i*3,arr[1][4],arr[1][5]+i*3);
+					ctx.stroke();
+					ctx.closePath();
+				}
+				for(var i=0;i<10;i++)
+				{
+					ctx.strokeStyle = 'rgba('+background+','+(1-i/10)+')';
+					ctx.lineWidth = 4;
+					
+					ctx.beginPath();
+					ctx.moveTo(arr[2][0],arr[2][1]-i*2);
+					ctx.bezierCurveTo(arr[3][0],arr[3][1]-i*2,arr[3][2],arr[3][3]-i*2,arr[3][4],arr[3][5]-i*2);
+					ctx.bezierCurveTo(arr[4][0],arr[4][1]-i*2,arr[4][2],arr[4][3]-i*2,arr[4][4],arr[4][5]-i*2);
+					ctx.stroke();
+					ctx.closePath();
+				}
+			}
+			
+			setInterval(redraw, 40);
+			//redraw();
+			
+			var canvaStar = document.getElementById('stars');
+			var cstr = canvaStar.getContext('2d');
+			var cW = canvaStar.width;
+			var cH = canvaStar.height;
+			var Nstars = 20;
+			var starset = [];
+			for(var i=0;i<Nstars;i++)
+			{
+				starset[i] = [cW*Math.random(), cH*Math.random()*0.3+150,Math.random()*0.4,Math.random()/10,0];
+			}
+			function drawStar() {
+				var side = 5;
+				cstr.beginPath();
+				cstr.moveTo(0,0-side);
+				cstr.lineTo(side/10,0-side/10);
+				cstr.lineTo(side,0);
+				cstr.lineTo(side/10,side/10);
+				cstr.lineTo(0,side);
+				cstr.lineTo(0-side/10,side/10);
+				cstr.lineTo(0-side,0);
+				cstr.lineTo(0-side/10,0-side/10);
+				cstr.closePath();			
+				cstr.lineWidth = 2;
+				cstr.lineJoin = 'miter';
+				cstr.miterLimit = 20;
+				cstr.fillStyle = 'rgb(255,255,255)';
+				cstr.strokeStyle = 'rgba(255,255,255,0.8)';
+				cstr.shadowOffsetX = 0;  
+				cstr.shadowOffsetY = 0;  
+				cstr.shadowBlur = 10;
+				cstr.shadowColor = "rgba(255, 255, 255, 1)";
+				cstr.stroke();
+				cstr.fill();				
+			}
+			function draw() {
+				cstr.clearRect(0,0,cW,cH);
+				
+				for(var i=0;i<Nstars;i++)
+				{
+					cstr.save();
+					cstr.translate(starset[i][0], starset[i][1]);
+					cstr.rotate(starset[i][4]);
+					starset[i][4] += (1+i/2)*Math.PI/180;
+					starset[i][3] = waves(starset[i][2],starset[i][3],0.4);
+					starset[i][2] += starset[i][3]*0.1;
+					if(starset[i][2] < -0.38)
+					{
+						starset[i][0] = cW*Math.random();
+						starset[i][1] = cH*Math.random()*0.6+150;
+						starset[i][2] = -0.37;
+						starset[i][3] = 0.05 + rounder(Math.random(), 2);
+					}
+					cstr.scale((0.6+starset[i][2])*0.4, (0.6+starset[i][2])*0.4);
+					drawStar();
+					cstr.restore();
+				}
+			}
+			setInterval(draw, 40);
+			//draw();
+		</script>
+	</body>
+</html>
+
