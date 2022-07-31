@@ -1,3 +1,3 @@
-# Nothenr lights
+# Nothern lights
 
-Северное сияние на canvas
+Nothern lights on JS canvas
