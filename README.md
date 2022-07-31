@@ -1,2 +1,3 @@
-# starsky
-stars
+# Nothenr lights
+
+Северное сияние на canvas
